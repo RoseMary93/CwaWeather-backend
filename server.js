@@ -37,18 +37,18 @@ const getKaohsiungWeather = async (req, res) => {
       {
         params: {
           Authorization: CWA_API_KEY,
-          locationName: "宜蘭縣",
+          locationName: "臺北市",
         },
       }
     );
 
-    // 取得高雄市的天氣資料
+    // 取得該縣市的天氣資料
     const locationData = response.data.records.location[0];
 
     if (!locationData) {
       return res.status(404).json({
         error: "查無資料",
-        message: "無法取得高雄市天氣資料",
+        message: "無法取得該縣市天氣資料",
       });
     }
 
@@ -141,7 +141,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
 
-// 取得高雄天氣預報
+// 取得天氣預報
 app.get("/api/weather/kaohsiung", getKaohsiungWeather);
 
 // Error handling middleware
