@@ -195,15 +195,28 @@ const getWeeklyWeather = async (req, res) => {
       }
     );
 
-    // 解析新 API 格式 - records.Locations[0].Location[0]
+    // 解析新 API 格式 - records.Locations[0].Location
     let locationData;
-    
-    if (response.data.records && 
-        response.data.records.Locations && 
-        response.data.records.Locations[0] &&
-        response.data.records.Locations[0].Location &&
-        response.data.records.Locations[0].Location[0]) {
-      locationData = response.data.records.Locations[0].Location[0];
+
+    if (
+      response.data.records &&
+      response.data.records.Locations &&
+      response.data.records.Locations[0] &&
+      response.data.records.Locations[0].Location &&
+      Array.isArray(response.data.records.Locations[0].Location)
+    ) {
+      const locations = response.data.records.Locations[0].Location;
+
+      // 嘗試在陣列中找到與 request 的 locationName 精確或包含匹配的項目
+      locationData = locations.find(
+        (loc) => loc.LocationName === locationName || (loc.LocationName && loc.LocationName.includes(locationName))
+      );
+
+      // 若找不到，退回到第一個（維持向後相容）
+      if (!locationData) {
+        console.warn('[WARN] 未在 Location 陣列中找到精確匹配的 LocationName，使用第一筆結果作為 fallback');
+        locationData = locations[0];
+      }
     } else {
       console.error("[ERROR] API 回應結構異常，無法找到位置資料");
       console.error("[DEBUG] 完整回應鑰匙:", Object.keys(response.data));
